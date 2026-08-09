@@ -48,7 +48,7 @@ This formula guarantees that all pages belonging to a specific client are confin
 
 I evaluated my model against a realistic, hardcoded business baseline: Rank <= 10 and CTR < 0.01. A page that ranks on the first page of search results but gets almost no clicks is a fundamental indicator of decaying relevance. My machine learning model must outperform this simple heuristic to justify its deployment.
 
-I rejected accuracy as an evaluation metric. Instead, I evaluated the model using Precision, Recall, and the use the **F<sub>0.5</sub>**-score. I use the $F_{0.5}$-score because it explicitly emphasizes precision over recall [1]. Precision is the most critical metric for this business problem. A false positive flags a healthy page as decaying, which wastes expensive human editorial time.
+I rejected accuracy as an evaluation metric. Instead, I evaluated the model using Precision, Recall, and the use the **F<sub>0.5</sub>**-score. I use the **F<sub>0.5</sub>**-score because it explicitly emphasizes precision over recall [1]. Precision is the most critical metric for this business problem. A false positive flags a healthy page as decaying, which wastes expensive human editorial time.
 
 **Model vs. Baseline (Unseen Test Data):**
 
