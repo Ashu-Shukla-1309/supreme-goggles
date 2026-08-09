@@ -2,7 +2,7 @@
 
 **Abstract**
 
-Organic search traffic decay causes long-term revenue loss for digital publishers. The standard industry approach waits for traffic to drop before taking action. I present supreme-goggles, an applied machine learning system that predicts traffic decay early. I built this system using a 30,000-row sampled subset of a 3.6-million-row production dataset from FlyRank. I prevented representation leakage by using a strict grouped data split (GroupShuffleSplit). I modeled the binary classification task using a Random Forest Classifier. I evaluated the model against a hardcoded business baseline using Precision, Recall, and the $F_{0.5}$-score. The model achieves statistically significant improvements in precision, which I proved using a bootstrapped 95% confidence interval. Finally, I translated the model probabilities into safe business actions using a "Content Action Playbook". This playbook uses strict guardrails to prevent automated errors on high-value pages.
+Organic search traffic decay causes long-term revenue loss for digital publishers. The standard industry approach waits for traffic to drop before taking action. I present supreme-goggles, an applied machine learning system that predicts traffic decay early. I built this system using a 30,000-row sampled subset of a 3.6-million-row production dataset from FlyRank. I prevented representation leakage by using a strict grouped data split (GroupShuffleSplit). I modeled the binary classification task using a Random Forest Classifier. I evaluated the model against a hardcoded business baseline using Precision, Recall, and the **F<sub>0.5</sub>**-score. The model achieves statistically significant improvements in precision, which I proved using a bootstrapped 95% confidence interval. Finally, I translated the model probabilities into safe business actions using a "Content Action Playbook". This playbook uses strict guardrails to prevent automated errors on high-value pages.
 
 ## **1\. Introduction and Business Problem**
 
@@ -37,10 +37,9 @@ First, I audited the feature space for future-state leakage. I discovered that t
 
 Second, I mitigated representation leakage. The FlyRank dataset is a multi-tenant B2B dataset where rows are clustered by client ID. If I use a standard random train-test split, rows from the exact same client will appear in both the training set and the test set. The model will artificially inflate its performance by memorizing specific client baselines rather than learning the generalized mechanics of traffic decay. I observed that baseline decline rates varied wildly between clients, ranging from 0.30 to 0.72.
 
-To fix this, I implemented GroupShuffleSplit. Let $\mathcal{G}$ represent the set of all unique clients. I enforced a strict disjoint condition on the group identifier space:
+To fix this, I implemented GroupShuffleSplit. Let **G** represent the set of all unique clients. I enforced a strict disjoint condition on the group identifier space:
 
-$\mathcal{G}_{train} \cap \mathcal{G}_{test} = \emptyset$ 
-
+G_train ∩ G_test = Ø
 This formula guarantees that all pages belonging to a specific client are confined exclusively to either the training set or the test set. By enforcing this strict separation, I mathematically guarantee that the model is evaluated on its ability to generalize to entirely new, unseen clients.
 
 ![Validation Leakage Comparison](work/figures/validation_leakage.png)
@@ -49,16 +48,16 @@ This formula guarantees that all pages belonging to a specific client are confin
 
 I evaluated my model against a realistic, hardcoded business baseline: Rank <= 10 and CTR < 0.01. A page that ranks on the first page of search results but gets almost no clicks is a fundamental indicator of decaying relevance. My machine learning model must outperform this simple heuristic to justify its deployment.
 
-I rejected accuracy as an evaluation metric. Instead, I evaluated the model using Precision, Recall, and the $F_{0.5}$-score. I use the $F_{0.5}$-score because it explicitly emphasizes precision over recall [1]. Precision is the most critical metric for this business problem. A false positive flags a healthy page as decaying, which wastes expensive human editorial time.
+I rejected accuracy as an evaluation metric. Instead, I evaluated the model using Precision, Recall, and the use the **F<sub>0.5</sub>**-score. I use the $F_{0.5}$-score because it explicitly emphasizes precision over recall [1]. Precision is the most critical metric for this business problem. A false positive flags a healthy page as decaying, which wastes expensive human editorial time.
 
 **Model vs. Baseline (Unseen Test Data):**
 
-* **W04 Hardcoded Rule:** Precision: 0.424 | Recall: 0.146 | $F_{0.5}$-score: 0.307  
-* **Random Forest (Depth 6):** Precision: 0.671 | Recall: 0.753 | $F_{0.5}$-Score: 0.686
+* **W04 Hardcoded Rule:** Precision: 0.424 | Recall: 0.146 | **F<sub>0.5</sub>**-score: 0.307  
+* **Random Forest (Depth 6):** Precision: 0.671 | Recall: 0.753 | **F<sub>0.5</sub>**-score: 0.686
 
 To prove the model's superiority on unseen clients, I calculated a bootstrapped 95% confidence interval for Precision using the grouped split. I drew 1,000 random samples with replacement from the test set and calculated the precision for each sample:
 
-$Precision = \frac{True Positives}{True Positives + False Positives}$
+Precision = True Positives / (True Positives + False Positives)
 
 * **Bootstrapped Precision Mean:** 0.644  
 * **95% Confidence Interval:** [0.629, 0.659]
